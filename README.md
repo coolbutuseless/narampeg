@@ -12,9 +12,14 @@
 `narampeg` is a video decoder which supports mpeg1 video and mp2 audio.
 Realtime decoding+playback works (tested on a Mac M2).
 
-# TODO before release
+## What’s in the box
 
-- Render a small snippet from ‘BigBuckBunny’ to include in package.
+- `ctx <- init_mpeg(file)`
+- `mpeg_info(ctx)`
+- `mpeg_decode_video(ctx)`, `mpeg_decode_audio(ctx)`
+- `mpeg_seek(ctx, time_in_seconds)`
+- Demo mpeg1 file with audio. A 5-second snippet from [BigBuckBunny]():
+  - `system.file('bigbuckbunny.mpg', package = 'narampeg')`
 
 ## Future
 
@@ -53,6 +58,7 @@ x11(type = 'dbcairo', antialias = 'none', width = 7, height = 4)
 dev.control(displaylist = 'inhibit')
 
 # Initialise the playback
+file <- system.file('bigbuckbunny.mpg', package = 'narampeg', mustWork = TRUE)
 ctx <- narampeg::init_mpeg(file)
 gov <- governor::gov_init(1/25)  # 25fps
 
