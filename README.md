@@ -11,7 +11,16 @@
 <!-- badges: end -->
 
 `narampeg` is a video decoder which supports mpeg1 video and mp2 audio.
-Realtime decoding+playback works (tested on a Mac M2).
+
+Real-time video decoding + playback works (tested on a Mac M2).
+
+This package uses [PL MPEG](https://github.com/phoboslab/pl_mpeg) mpeg
+decoding (MIT licensed).
+
+Note: Real-time audio playback is a work-in-progress. It does not appear
+to be possible to have gap-less streaming playback using the current
+`{audio}` package - but I’m happy to be proved wrong if you figure out
+how to do it!!
 
 ## What’s in the box
 
@@ -19,13 +28,17 @@ Realtime decoding+playback works (tested on a Mac M2).
 - `mpeg_info(ctx)`
 - `mpeg_decode_video(ctx)`, `mpeg_decode_audio(ctx)`
 - `mpeg_seek(ctx, time_in_seconds)`
-- Demo mpeg1 file with audio. A 5-second snippet from [BigBuckBunny]():
+- Demo mpeg file:
+  - A 5-second mpeg video snippet (with audio) from
+    [BigBuckBunny](https://peach.blender.org/)
   - `system.file('bigbuckbunny.mpg', package = 'narampeg')`
+  - BigBuckBunny is (c) copyright 2008, Blender Foundation /
+    www.bigbuckbunny.org
 
 ## Future
 
-- Figure out way to playback gapless audio. I don’t think this is
-  possible with the current `{audio}` package.
+- Figure out way to playback gap-less streaming audio. I don’t think
+  this is possible with the current `{audio}` package.
 - Implement a more complete video playback package using the `ffmpeg`
   library.
   - **Happy to help somebody else do this if they’re interested**
