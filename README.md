@@ -7,6 +7,7 @@
 
 ![](https://img.shields.io/badge/cool-useless-green.svg)
 ![](https://img.shields.io/badge/dependencies-zero-blue.svg)
+[![R-CMD-check](https://github.com/coolbutuseless/narampeg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/coolbutuseless/narampeg/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `narampeg` is a video decoder which supports mpeg1 video and mp2 audio.
@@ -26,8 +27,8 @@ Realtime decoding+playback works (tested on a Mac M2).
 - Figure out way to playback gapless audio. I don’t think this is
   possible with the current `{audio}` package.
 - Implement a more complete video playback package using the `ffmpeg`
-  library. \*\* Happy to help somebody else do this if they’re
-  interested \*\*
+  library.
+  - **Happy to help somebody else do this if they’re interested**
 
 ## Installation
 
@@ -91,9 +92,9 @@ mpeg_info(ctx) |> unlist()
 #>         44100             0           248
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Render 4 images from various times within the video
+# Render images from various times within the video
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-for (t in c(20, 30, 60, 120)) {
+for (t in c(20, 30, 60)) {
   grid::grid.newpage()
   mpeg_seek(ctx, time = t)
   nr <- mpeg_decode_video(ctx)
@@ -102,7 +103,46 @@ for (t in c(20, 30, 60, 120)) {
 }
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" /><img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" /><img src="man/figures/README-unnamed-chunk-3-3.png" width="100%" /><img src="man/figures/README-unnamed-chunk-3-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" /><img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" /><img src="man/figures/README-unnamed-chunk-3-3.png" width="100%" />
+
+## Example: Extract audio
+
+``` r
+library(narampeg)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Open a video file
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+file <- system.file('bigbuckbunny.mpg', package = 'narampeg', mustWork = TRUE)
+ctx <- init_mpeg(file, video = FALSE, audio = TRUE)
+mpeg_info(ctx) |> unlist()
+#>         width        height video_streams audio_streams           fps 
+#>           640           360             1             1            24 
+#>   sample_rate interval_time      duration 
+#>         44100             0             4
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Render images from various times within the video
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N <- 200
+snds <- vector('list', N)
+for (i in seq_len(N)) {
+  snds[[i]] <- mpeg_decode_audio(ctx)
+}
+
+snd <- unlist(snds)
+snd <- matrix(snd, nrow = 2)
+snd <- audio::as.audioSample(snd, rate = 44100)
+
+# plot first audio channel
+plot(snd[1,], type = 'l') 
+```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+``` r
+audio::play(snd)
+```
 
 ## Preparing mpeg1 video files with `ffmpeg`
 

@@ -20,6 +20,7 @@ library(narampeg)
 <!-- badges: start -->
 ![](https://img.shields.io/badge/cool-useless-green.svg)
 ![](https://img.shields.io/badge/dependencies-zero-blue.svg)
+[![R-CMD-check](https://github.com/coolbutuseless/narampeg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/coolbutuseless/narampeg/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `narampeg` is a video decoder which supports mpeg1 video and mp2 audio.  Realtime decoding+playback works (tested on a Mac M2).
@@ -39,7 +40,7 @@ library(narampeg)
 * Figure out way to playback gapless audio. I don't think this is possible with 
   the current `{audio}` package.
 * Implement a more complete video playback package using the `ffmpeg` library.
-  ** Happy to help somebody else do this if they're interested **
+    * **Happy to help somebody else do this if they're interested**
 
 ## Installation
 
@@ -99,9 +100,9 @@ ctx <- init_mpeg(file)
 mpeg_info(ctx) |> unlist()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Render 4 images from various times within the video
+# Render images from various times within the video
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-for (t in c(20, 30, 60, 120)) {
+for (t in c(20, 30, 60)) {
   grid::grid.newpage()
   mpeg_seek(ctx, time = t)
   nr <- mpeg_decode_video(ctx)
@@ -111,8 +112,38 @@ for (t in c(20, 30, 60, 120)) {
 ```
 
 
+## Example: Extract audio
 
+```{r}
+library(narampeg)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Open a video file
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+file <- system.file('bigbuckbunny.mpg', package = 'narampeg', mustWork = TRUE)
+ctx <- init_mpeg(file, video = FALSE, audio = TRUE)
+mpeg_info(ctx) |> unlist()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Render images from various times within the video
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N <- 200
+snds <- vector('list', N)
+for (i in seq_len(N)) {
+  snds[[i]] <- mpeg_decode_audio(ctx)
+}
+
+snd <- unlist(snds)
+snd <- matrix(snd, nrow = 2)
+snd <- audio::as.audioSample(snd, rate = 44100)
+
+# plot first audio channel
+plot(snd[1,], type = 'l') 
+```
+
+```{r eval=FALSE}
+audio::play(snd)
+```
 
 
 
