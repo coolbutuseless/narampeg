@@ -1,0 +1,18 @@
+Package: narampeg
+Type: Package
+Title: MPEG1 Video Decoder
+Version: 0.1.0
+Authors@R: c(
+    person("Mike", "Cheng", role = c("aut", "cre", 'cph'), email = "mikefc@coolbutuseless.com"),
+    person("Dominic", "Szablewski", role = c("aut", 'cph'))
+    )
+Maintainer: Mike Cheng <mikefc@coolbutuseless.com>
+Description: MPEG1 video decoder.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Copyright: The included 'pl_mpeg' code is Copyright (c) 2019 Dominic Szablewski. 
+    See 'COPYRIGHTS' for LICENSE for inclued code.  'BigBuckBunny' is
+    (c) copyright 2008, Blender Foundation / www.bigbuckbunny.org
+
