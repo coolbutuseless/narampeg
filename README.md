@@ -28,6 +28,7 @@ how to do it!!
 - `mpeg_info(ctx)`
 - `mpeg_decode_video(ctx)`, `mpeg_decode_audio(ctx)`
 - `mpeg_seek(ctx, time_in_seconds)`
+- `mpeg_rewind(ctx)` reset the mpeg stream
 - Demo mpeg file:
   - A 5-second mpeg video snippet (with audio) from
     [BigBuckBunny](https://peach.blender.org/)
@@ -85,6 +86,8 @@ while(TRUE) {
 }      
 ```
 
+<img src="man/figures/playback.gif">
+
 ## Example: Rendering still images from a video
 
 - Demo file (45 Mb)
@@ -116,9 +119,19 @@ for (t in c(20, 30, 60)) {
 }
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" /><img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" /><img src="man/figures/README-unnamed-chunk-3-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" /><img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" /><img src="man/figures/README-unnamed-chunk-4-3.png" width="100%" />
 
 ## Example: Extract audio
+
+- Audio data is delivered in `frames`.  
+- One frame is 1152 interleaved stereo samples i.e. 2304 floating point
+  values.
+- Each sample is a value in the range \[-1, 1\]
+- At a sampling rate of 44100 Hz, this is approximately 26 milliseconds
+  of audio data
+
+In this example 200 frames of audio (about 5 seconds) are extracted from
+the mpeg file
 
 ``` r
 library(narampeg)
@@ -135,15 +148,10 @@ mpeg_info(ctx) |> unlist()
 #>         44100             0             4
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Render images from various times within the video
+# Extract 200 frames and format as an 'audioSample' object for playback
+# with the `{audio}` package
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-N <- 200
-snds <- vector('list', N)
-for (i in seq_len(N)) {
-  snds[[i]] <- mpeg_decode_audio(ctx)
-}
-
-snd <- unlist(snds)
+snd <- mpeg_decode_audio(ctx, n = 200)
 snd <- matrix(snd, nrow = 2)
 snd <- audio::as.audioSample(snd, rate = 44100)
 
@@ -151,7 +159,7 @@ snd <- audio::as.audioSample(snd, rate = 44100)
 plot(snd[1,], type = 'l') 
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 ``` r
 audio::play(snd)

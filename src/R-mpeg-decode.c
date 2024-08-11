@@ -132,33 +132,41 @@ SEXP mpeg_decode_video_(SEXP ctx_) {
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Decode a single frame of audio
+// Decode n frames of audio
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-SEXP mpeg_decode_audio_(SEXP ctx_) {
+SEXP mpeg_decode_audio_(SEXP ctx_, SEXP n_) {
   
   plm_t *plm = unpack_ext_ptr_to_mpeg_ctx(ctx_);
+  int n = asInteger(n_);
   
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Decode samples and convert from float to double to return to R
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  plm_samples_t *samples = plm_decode_audio(plm);
+  SEXP snd_ = PROTECT(allocVector(REALSXP, n * PLM_AUDIO_SAMPLES_PER_FRAME * 2));
+  double *snd = REAL(snd_);
+  memset(snd, 0, n * PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(double) );
   
-  if (samples) {
-    SEXP snd_ = PROTECT(allocVector(REALSXP, PLM_AUDIO_SAMPLES_PER_FRAME * 2));
-    double *snd = REAL(snd_);
+  int frame = 0;
+  for (frame = 0; frame < n; frame++) {
+    plm_samples_t *samples = plm_decode_audio(plm);
     
-    for (int i = 0; i < PLM_AUDIO_SAMPLES_PER_FRAME * 2; i++) {
-      snd[i] = samples->interleaved[i];
+    if (samples == NULL) {
+      break;
     }
     
-    UNPROTECT(1);
-    return(snd_);
+    for (int i = 0; i < PLM_AUDIO_SAMPLES_PER_FRAME * 2; i++) {
+      *snd++ = samples->interleaved[i];
+    }
   }
   
-  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  // If there were no samples, return NULL
-  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return R_NilValue;
+  if (frame == 0) {
+    // failed on first read
+    UNPROTECT(1);
+    return R_NilValue;
+  }
+  
+  UNPROTECT(1);
+  return(snd_);
 }
 
 
@@ -166,11 +174,18 @@ SEXP mpeg_decode_audio_(SEXP ctx_) {
 // Seek to a location within the file
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 SEXP mpeg_seek_(SEXP ctx_, SEXP time_, SEXP exact_) {
-  
   plm_t *plm = unpack_ext_ptr_to_mpeg_ctx(ctx_);
-
   int res = plm_seek(plm, asReal(time_), asLogical(exact_));
-    
   return ScalarLogical(res);
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Seek to a location within the file
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SEXP mpeg_rewind_(SEXP ctx_) {
+  plm_t *plm = unpack_ext_ptr_to_mpeg_ctx(ctx_);
+  plm_rewind(plm);
+  return R_NilValue;
 }
 

@@ -37,16 +37,23 @@ mpeg_decode_video <- function(ctx) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Decode a single frame of audio (1152 stereo samples)
+#' Decode frames of audio 
+#' 
+#' Each audio frame consists of 1152 interleaved stereo samples
 #' 
 #' @inheritParams mpeg_decode_video
+#' @param n number of frames of audio to decode
 #' 
-#' @return numeric vector with 2 * 1152 floating point sample values. Each 
+#' @return numeric vector with 2n * 1152 floating point sample values. Each 
 #'         sample is in the range [-1, 1]. The stereo channels are interleaved.
+#'         If the full number of audio frames cannot be returned (e.g. the 
+#'         mpeg stream is finished) then the audio samples will be set to 
+#'         0 for the missing samples.  If there is no audio data to return 
+#'         at all, then function returns NULL
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mpeg_decode_audio <- function(ctx) {
-  .Call(mpeg_decode_audio_, ctx)
+mpeg_decode_audio <- function(ctx, n = 1) {
+  .Call(mpeg_decode_audio_, ctx, n)
 }
 
 
@@ -75,6 +82,20 @@ mpeg_info <- function(ctx) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mpeg_seek <- function(ctx, time, exact = FALSE) {
   .Call(mpeg_seek_, ctx, time, isTRUE(exact))
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Rewind to beginning of mpeg 
+#' 
+#' @inheritParams mpeg_decode_video
+#' 
+#' @return None.
+#' @export
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mpeg_rewind <- function(ctx) {
+  .Call(mpeg_rewind_, ctx)
+  invisible()
 }
 
 

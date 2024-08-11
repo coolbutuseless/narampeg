@@ -40,6 +40,7 @@ I'm happy to be proved wrong if you figure out how to do it!!
 * `mpeg_info(ctx)`
 * `mpeg_decode_video(ctx)`, `mpeg_decode_audio(ctx)`
 * `mpeg_seek(ctx, time_in_seconds)`
+* `mpeg_rewind(ctx)` reset the mpeg stream
 * Demo mpeg file: 
     * A 5-second mpeg video snippet (with audio) from [BigBuckBunny](https://peach.blender.org/) 
     * `system.file('bigbuckbunny.mpg', package = 'narampeg')`
@@ -95,6 +96,14 @@ while(TRUE) {
 }      
 ```
 
+```{r echo=FALSE, eval=FALSE}
+ffmpeg -i Aug-10-2024\ 20-05-14.mp4 -vf "fps=20,scale=1440:-1:flags=lanczos" -c:v pam \
+    -f image2pipe - | \
+    convert -delay 4 - -loop 0 -layers optimize output.gif
+```
+
+<img src="man/figures/playback.gif">
+
 
 ## Example: Rendering still images from a video
 
@@ -125,6 +134,15 @@ for (t in c(20, 30, 60)) {
 
 ## Example: Extract audio
 
+* Audio data is delivered in `frames`.  
+* One frame is 1152 interleaved stereo samples i.e. 2304 floating point values.
+* Each sample is a value in the range [-1, 1]
+* At a sampling rate of 44100 Hz, this is approximately 26 milliseconds of audio data
+
+
+In this example 200 frames of audio (about 5 seconds) are extracted from the 
+mpeg file
+
 ```{r}
 library(narampeg)
 
@@ -136,15 +154,10 @@ ctx <- init_mpeg(file, video = FALSE, audio = TRUE)
 mpeg_info(ctx) |> unlist()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Render images from various times within the video
+# Extract 200 frames and format as an 'audioSample' object for playback
+# with the `{audio}` package
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-N <- 200
-snds <- vector('list', N)
-for (i in seq_len(N)) {
-  snds[[i]] <- mpeg_decode_audio(ctx)
-}
-
-snd <- unlist(snds)
+snd <- mpeg_decode_audio(ctx, n = 200)
 snd <- matrix(snd, nrow = 2)
 snd <- audio::as.audioSample(snd, rate = 44100)
 

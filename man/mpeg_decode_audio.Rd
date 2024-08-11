@@ -2,17 +2,23 @@
 % Please edit documentation in R/mpeg.R
 \name{mpeg_decode_audio}
 \alias{mpeg_decode_audio}
-\title{Decode a single frame of audio (1152 stereo samples)}
+\title{Decode frames of audio}
 \usage{
-mpeg_decode_audio(ctx)
+mpeg_decode_audio(ctx, n = 1)
 }
 \arguments{
 \item{ctx}{mpeg context (as created by \code{init_mpeg()})}
+
+\item{n}{number of frames of audio to decode}
 }
 \value{
-numeric vector with 2 * 1152 floating point sample values. Each 
+numeric vector with 2n * 1152 floating point sample values. Each 
         sample is in the range [-1, 1]. The stereo channels are interleaved.
+        If the full number of audio frames cannot be returned (e.g. the 
+        mpeg stream is finished) then the audio samples will be set to 
+        0 for the missing samples.  If there is no audio data to return 
+        at all, then function returns NULL
 }
 \description{
-Decode a single frame of audio (1152 stereo samples)
+Each audio frame consists of 1152 interleaved stereo samples
 }
