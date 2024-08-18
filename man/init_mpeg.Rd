@@ -4,14 +4,14 @@
 \alias{init_mpeg}
 \title{Initialise mpeg playback}
 \usage{
-init_mpeg(file, video = TRUE, audio = FALSE, audio_stream = 0)
+init_mpeg(file, video = TRUE, audio = TRUE, audio_stream = 0)
 }
 \arguments{
 \item{file}{mpeg1 filename}
 
-\item{video}{logical. Should video be decoded?  Default: FALSE}
+\item{video}{logical. Should video be decoded?  Default: TRUE}
 
-\item{audio}{logical. Should audio be decoded?  Default: FALSE}
+\item{audio}{logical. Should audio be decoded?  Default: TRUE}
 
 \item{audio_stream}{audio stream to play. Default: 0}
 }
